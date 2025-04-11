@@ -5,6 +5,7 @@ import { ColDef } from 'ag-grid-community';
 // node_modules\ag-grid-community\dist\styles\ag-theme-alpine.css
 import 'ag-grid-community/dist/styles/ag-grid.min.css';
 import 'ag-grid-community/dist/styles/ag-theme-alpine.css';
+import { MyCellComponent } from '../my-cell/my-cell.component';
 
 @Component({
   selector: 'app-grid-sample',
@@ -29,7 +30,10 @@ export class GridSampleComponent implements OnInit {
       valueGetter: p=> p.data.carMake + ' ' + p.data.price,
       headerName: "Company"
     },
-    { field: "carMake" },
+    {
+      field: "carMake",
+      cellRenderer: MyCellComponent
+    },
     { field: "model" },
     { 
       field: "price",
