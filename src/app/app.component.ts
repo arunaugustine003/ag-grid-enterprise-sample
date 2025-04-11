@@ -9,11 +9,12 @@ import 'ag-grid-enterprise';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
+
 export class AppComponent {
   public columnDefs: ColDef[] = [
-    { field: 'athlete', filter: 'agTextColumnFilter', floatingFilter: true },
+    { field: 'athlete', filter: 'agTextColumnFilter', floatingFilter: true, rowGroup: true },
     { field: 'age', filter: 'agNumberColumnFilter', floatingFilter: true },
-    { field: 'country', filter: 'agTextColumnFilter', floatingFilter: true },
+    { field: 'country', filter: 'agTextColumnFilter', floatingFilter: true, rowGroup: true },
     { field: 'year', filter: 'agNumberColumnFilter', floatingFilter: true },
     { field: 'date', filter: 'agDateColumnFilter', floatingFilter: true },
     { field: 'sport', filter: 'agTextColumnFilter', floatingFilter: true },
@@ -29,11 +30,42 @@ export class AppComponent {
   };
   
   public rowData$!: Observable<any[]>;
+  private gridApi: any;
 
   constructor(private http: HttpClient) {}
 
   onGridReady(params: GridReadyEvent) {
+    this.gridApi = params.api;
     this.rowData$ = this.http
       .get<any[]>('https://www.ag-grid.com/example-assets/olympic-winners.json');
+  }
+
+  onFilterChanged() {
+    if (this.gridApi) {
+      // Collapse everything first
+      this.gridApi.collapseAll();
+  
+      // Find first visible leaf node (not a group)
+      let firstDataNode: any = null;
+  
+      this.gridApi.forEachNodeAfterFilterAndSort((node: any) => {
+        if (!node.group && !firstDataNode) {
+          firstDataNode = node;
+        }
+      });
+  
+      // Expand its parent groups if found
+      if (firstDataNode) {
+        let parent = firstDataNode.parent;
+        while (parent) {
+          parent.setExpanded(true);
+          parent = parent.parent;
+        }
+      }
+    }
+  }
+
+  onFirstDataRendered() {
+    this.onFilterChanged();
   }
 }
